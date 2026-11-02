@@ -1,0 +1,23 @@
+services:
+  oracle:
+    image: gvenzl/oracle-free:23-slim
+    container_name: stocktrack-oracle
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: OracleAdmin123      # SYS/SYSTEM password (local dev only)
+      APP_USER: stocktrack                 # created automatically in FREEPDB1
+      APP_USER_PASSWORD: StockTrack123
+    volumes:
+      # init/ runs once, the first time the database starts; it executes sql/ in name order.
+      - ./database/init:/container-entrypoint-initdb.d
+      - ./database/sql:/opt/stocktrack-sql
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  oracle-data:

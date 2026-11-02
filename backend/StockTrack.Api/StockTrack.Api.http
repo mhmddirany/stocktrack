@@ -1,0 +1,43 @@
+### Manual API tests (open in VS Code with the REST Client extension, or in Visual Studio / Rider)
+@api = http://localhost:5000
+
+### 1. Log in and copy the token from the response
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "username": "admin", "password": "Admin123!" }
+
+### Paste the token here
+@token = PASTE_TOKEN_HERE
+
+### 2. List products (search + category filter)
+GET {{api}}/api/products?search=monitor
+Authorization: Bearer {{token}}
+
+### 3. Low-stock products
+GET {{api}}/api/products/low-stock
+Authorization: Bearer {{token}}
+
+### 4. Place an order (should succeed)
+POST {{api}}/api/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "customerName": "Beirut Office Supplies", "items": [ { "productId": 1, "quantity": 2 }, { "productId": 5, "quantity": 3 } ] }
+
+### 5. Place an order with too much quantity (expect 409 "Not enough stock", nothing saved)
+POST {{api}}/api/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "customerName": "Big Buyer", "items": [ { "productId": 1, "quantity": 1 }, { "productId": 2, "quantity": 999 } ] }
+
+### 6. Cancel order 1 (stock goes back)
+POST {{api}}/api/orders/1/cancel
+Authorization: Bearer {{token}}
+
+### 7. Log in as staff and try to delete a product (expect 403 Forbidden)
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "username": "staff", "password": "Staff123!" }
